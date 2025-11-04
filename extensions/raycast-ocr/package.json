@@ -33,12 +33,6 @@
       "title": "OCR from Screenshot",
       "description": "Take screenshot and recognize text and formulas (auto LaTeX conversion with LLM backends)",
       "mode": "no-view"
-    },
-    {
-      "name": "configure-ocr",
-      "title": "Configure OCR",
-      "description": "View and configure OCR backend settings",
-      "mode": "view"
     }
   ],
   "preferences": [
@@ -145,13 +139,13 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.9",
-    "@types/react": "^18.3.3",
+    "@types/react": "18.3.12",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
     "@typescript-eslint/parser": "^7.15.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.2",
-    "react": "^18.3.1",
+    "react": "18.3.1",
     "typescript": "^5.5.3"
   },
   "scripts": {
