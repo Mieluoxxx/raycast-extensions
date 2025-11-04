@@ -1,0 +1,165 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-ocr",
+  "title": "OCR Text Recognition",
+  "description": "Extract text from images using macOS Vision API, OpenAI, or Gemini with smart LaTeX formula recognition",
+  "icon": "icon-anthropic.png",
+  "author": "mieluoxxx",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "ocr",
+    "screenshot",
+    "clipboard",
+    "llm",
+    "openai"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "files": [
+    "assets"
+  ],
+  "commands": [
+    {
+      "name": "ocr-from-clipboard",
+      "title": "OCR from Clipboard",
+      "description": "Recognize text and formulas from image in clipboard (auto LaTeX conversion with LLM backends)",
+      "mode": "no-view"
+    },
+    {
+      "name": "ocr-from-screenshot",
+      "title": "OCR from Screenshot",
+      "description": "Take screenshot and recognize text and formulas (auto LaTeX conversion with LLM backends)",
+      "mode": "no-view"
+    },
+    {
+      "name": "configure-ocr",
+      "title": "Configure OCR",
+      "description": "View and configure OCR backend settings",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ocrBackend",
+      "type": "dropdown",
+      "required": true,
+      "title": "OCR Backend",
+      "description": "Choose which OCR engine to use",
+      "default": "vision",
+      "data": [
+        {
+          "title": "macOS Vision API (Free, Local, Private)",
+          "value": "vision"
+        },
+        {
+          "title": "OpenAI Vision (Requires API Key)",
+          "value": "openai"
+        },
+        {
+          "title": "Google Gemini Vision (Requires API Key)",
+          "value": "gemini"
+        }
+      ]
+    },
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key (only needed for OpenAI backend)",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "openaiApiEndpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "API Endpoint",
+      "description": "Custom OpenAI-compatible API endpoint (optional)",
+      "default": "https://api.openai.com/v1",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "name": "openaiModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Model Name",
+      "description": "OpenAI model to use for OCR",
+      "default": "gpt-4o",
+      "placeholder": "gpt-4o"
+    },
+    {
+      "name": "openaiDetail",
+      "type": "dropdown",
+      "required": false,
+      "title": "Image Detail Level",
+      "description": "Higher detail = better OCR accuracy but slower and more expensive",
+      "default": "high",
+      "data": [
+        {
+          "title": "High (Best for OCR)",
+          "value": "high"
+        },
+        {
+          "title": "Auto (Balanced)",
+          "value": "auto"
+        },
+        {
+          "title": "Low (Faster, cheaper)",
+          "value": "low"
+        }
+      ]
+    },
+    {
+      "name": "geminiApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Gemini API Key",
+      "description": "Your Google Gemini API key (only needed for Gemini backend)",
+      "placeholder": "AIza..."
+    },
+    {
+      "name": "geminiApiEndpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "Gemini API Endpoint",
+      "description": "Custom Gemini API endpoint (optional)",
+      "default": "https://generativelanguage.googleapis.com/v1beta",
+      "placeholder": "https://generativelanguage.googleapis.com/v1beta"
+    },
+    {
+      "name": "geminiModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Gemini Model",
+      "description": "Gemini model to use for OCR",
+      "default": "gemini-2.5-flash",
+      "placeholder": "gemini-2.5-flash"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "@typescript-eslint/parser": "^7.15.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "react": "^18.3.1",
+    "typescript": "^5.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`pnpm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`pnpm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "pnpm dlx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# production
+dist/
+
+# misc
+.DS_Store
+*.log
+
+# Raycast
+.raycast/
+
+# TypeScript
+*.tsbuildinfo
+
+# pnpm
+pnpm-lock.yaml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+PUBLISHING_GUIDE.md
