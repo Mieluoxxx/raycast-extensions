@@ -19,9 +19,9 @@ interface VisionResult {
 }
 
 export class VisionAPIBackend implements IOCRBackend {
-  async recognizeText(imagePath: string, customPrompt?: string): Promise<string> {
-    // Vision API 不支持自定义提示词，忽略该参数
-    // LLM 后端会自动处理数学公式转 LaTeX，Vision API 只做基础文字识别
+  async recognizeText(imagePath: string, _customPrompt?: string): Promise<string> {
+    // Vision API doesn't support custom prompts, this parameter is intentionally unused
+    // LLM backends will automatically handle math formula to LaTeX conversion, Vision API only does basic text recognition
     const scriptPath = path.join(environment.assetsPath, "scripts", "vision-ocr.swift");
 
     try {

@@ -12,6 +12,13 @@ interface VisionResult {
 }
 
 /**
+ * Escape shell argument to prevent command injection
+ */
+function escapeShellArg(arg: string): string {
+  return arg.replace(/'/g, "'\\''");
+}
+
+/**
  * Recognize text from an image using macOS Vision API
  * @param imagePath - Absolute path to the image file
  * @returns Recognized text
@@ -22,10 +29,13 @@ export async function recognizeTextFromImage(imagePath: string): Promise<string>
   const scriptPath = path.join(environment.assetsPath, "scripts", "vision-ocr.swift");
 
   try {
-    const { stdout, stderr } = await execAsync(`/usr/bin/swift "${scriptPath}" "${imagePath}"`, {
-      timeout: 30000, // 30 second timeout for Swift compilation and Vision API processing
-      maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large text output
-    });
+    const { stdout, stderr } = await execAsync(
+      `/usr/bin/swift '${escapeShellArg(scriptPath)}' '${escapeShellArg(imagePath)}'`,
+      {
+        timeout: 30000, // 30 second timeout for Swift compilation and Vision API processing
+        maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large text output
+      }
+    );
 
     // Log stderr for debugging if present
     if (stderr) {

@@ -1,21 +1,26 @@
 module.exports = {
   root: true,
-  extends: ["prettier"],
+  extends: [
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
+  ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 2022,
     sourceType: "module",
-    ecmaFeatures: {
-      jsx: true,
-    },
   },
-  env: {
-    browser: true,
-    es2020: true,
-    node: true,
-  },
-  plugins: ["@typescript-eslint"],
+  plugins: [
+    "@typescript-eslint",
+    "@raycast",
+  ],
   rules: {
-    // 基础规则
+    "@raycast/prefer-title-case": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+      },
+    ],
   },
 };

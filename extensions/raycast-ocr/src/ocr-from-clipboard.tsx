@@ -8,52 +8,52 @@ export default async function Command() {
   let tempFilePath: string | null = null;
 
   try {
-    // 显示加载提示
+    // Show loading toast
     await showToast({
       style: Toast.Style.Animated,
-      title: "正在识别图片中的文字...",
+      title: "Recognizing text from image...",
     });
 
-    // 获取剪贴板图片
+    // Get clipboard image
     tempFilePath = await getClipboardImagePath();
 
     if (!tempFilePath) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "剪贴板中没有图片",
-        message: "请先复制或截图一张包含文字的图片",
+        title: "No image in clipboard",
+        message: "Please copy or screenshot an image containing text first",
       });
       return;
     }
 
-    // 创建后端实例
+    // Create backend instance
     const config = await getBackendConfig();
     const backend = OCRBackendFactory.create(config);
 
-    // 执行 OCR
+    // Perform OCR
     const recognizedText = await backend.recognizeText(tempFilePath);
 
     if (!recognizedText || recognizedText.trim().length === 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "未识别到文字",
-        message: "图片中可能没有文字，或文字不够清晰",
+        title: "No text recognized",
+        message: "The image may not contain text, or the text is not clear enough",
       });
       return;
     }
 
-    // 复制到剪贴板
+    // Copy to clipboard
     await Clipboard.copy(recognizedText);
 
-    // 显示成功消息
+    // Show success message
     const preview = recognizedText.length > 100 ? recognizedText.substring(0, 100) + "..." : recognizedText;
 
-    await showHUD(`✓ 已复制识别结果: ${preview}`);
+    await showHUD(`✓ Copied recognition result: ${preview}`);
   } catch (error) {
     console.error("OCR Error:", error);
     await handleOCRError(error);
   } finally {
-    // 清理临时文件
+    // Cleanup temporary file
     if (tempFilePath && tempFilePath.startsWith("/tmp/raycast-ocr")) {
       await cleanupTempFile(tempFilePath);
     }
@@ -61,7 +61,7 @@ export default async function Command() {
 }
 
 /**
- * 统一的错误处理
+ * Unified error handling
  */
 async function handleOCRError(error: unknown) {
   if (error instanceof OCRError) {
@@ -69,39 +69,39 @@ async function handleOCRError(error: unknown) {
       case OCRErrorType.API_KEY_INVALID:
         await showToast({
           style: Toast.Style.Failure,
-          title: "API Key 错误",
-          message: "请在扩展设置中配置有效的 OpenAI API Key",
+          title: "API Key Error",
+          message: "Please configure a valid API Key in extension settings",
         });
         break;
 
       case OCRErrorType.QUOTA_EXCEEDED:
         await showToast({
           style: Toast.Style.Failure,
-          title: "配额超限",
-          message: "API 配额已用尽或达到速率限制，请稍后重试",
+          title: "Quota Exceeded",
+          message: "API quota exhausted or rate limit reached, please try again later",
         });
         break;
 
       case OCRErrorType.TIMEOUT:
         await showToast({
           style: Toast.Style.Failure,
-          title: "请求超时",
-          message: "OCR 处理时间过长，请尝试使用更小的图片",
+          title: "Request Timeout",
+          message: "OCR processing took too long, try using a smaller image",
         });
         break;
 
       case OCRErrorType.NETWORK_ERROR:
         await showToast({
           style: Toast.Style.Failure,
-          title: "网络错误",
-          message: "无法连接到 API 服务，请检查网络连接",
+          title: "Network Error",
+          message: "Unable to connect to API service, please check your connection",
         });
         break;
 
       case OCRErrorType.CONFIG_ERROR:
         await showToast({
           style: Toast.Style.Failure,
-          title: "配置错误",
+          title: "Configuration Error",
           message: error.message,
         });
         break;
@@ -109,7 +109,7 @@ async function handleOCRError(error: unknown) {
       case OCRErrorType.INVALID_IMAGE:
         await showToast({
           style: Toast.Style.Failure,
-          title: "图片错误",
+          title: "Image Error",
           message: error.message,
         });
         break;
@@ -117,15 +117,15 @@ async function handleOCRError(error: unknown) {
       default:
         await showToast({
           style: Toast.Style.Failure,
-          title: "识别失败",
+          title: "Recognition Failed",
           message: error.message,
         });
     }
   } else {
     await showToast({
       style: Toast.Style.Failure,
-      title: "识别失败",
-      message: error instanceof Error ? error.message : "未知错误，请重试",
+      title: "Recognition Failed",
+      message: error instanceof Error ? error.message : "Unknown error, please try again",
     });
   }
 }

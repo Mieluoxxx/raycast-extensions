@@ -1,11 +1,18 @@
 import { Clipboard } from "@raycast/api";
-import { writeFile, unlink } from "fs/promises";
+import { unlink } from "fs/promises";
 import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import { randomUUID } from "crypto";
 
 const execAsync = promisify(exec);
+
+/**
+ * Escape shell argument to prevent command injection
+ */
+function escapeShellArg(arg: string): string {
+  return arg.replace(/'/g, "'\\''");
+}
 
 /**
  * Get image from clipboard and save to temporary file
@@ -34,7 +41,7 @@ export async function getClipboardImagePath(): Promise<string | null> {
 
     // Use osascript to check and save clipboard image
     const script = `
-      set theFile to POSIX file "${tempPath}"
+      set theFile to POSIX file "'${escapeShellArg(tempPath)}'"
       try
         set imageData to the clipboard as «class PNGf»
         set fileRef to open for access theFile with write permission
@@ -67,7 +74,7 @@ export async function takeScreenshot(): Promise<string> {
   const tempPath = path.join("/tmp", `raycast-ocr-screenshot-${randomUUID()}.png`);
 
   // Use macOS screencapture utility with full path
-  await execAsync(`/usr/sbin/screencapture -i "${tempPath}"`);
+  await execAsync(`/usr/sbin/screencapture -i '${escapeShellArg(tempPath)}'`);
 
   return tempPath;
 }
