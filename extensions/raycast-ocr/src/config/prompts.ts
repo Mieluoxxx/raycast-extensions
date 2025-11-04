@@ -1,11 +1,11 @@
 /**
- * OCR 提示词配置
- * 智能识别文字和数学公式，利用 LLM 能力自动处理
+ * OCR Prompt Configuration
+ * Intelligent text and mathematical formula recognition leveraging LLM capabilities
  */
 
 /**
- * 增强的 OCR 提示词
- * 支持普通文字识别 + 数学公式自动转换为 LaTeX
+ * Enhanced OCR Prompt
+ * Supports general text recognition + automatic conversion of mathematical formulas to LaTeX
  */
 export const STANDARD_OCR_PROMPT = `Extract all text from this image accurately. If the image contains mathematical formulas, convert them to LaTeX code.
 

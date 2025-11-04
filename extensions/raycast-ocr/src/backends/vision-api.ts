@@ -1,6 +1,6 @@
 /**
- * macOS Vision API 后端实现
- * 封装现有的 Swift Vision API 调用逻辑
+ * macOS Vision API Backend Implementation
+ * Encapsulates the existing Swift Vision API calling logic
  */
 
 import { exec } from "child_process";

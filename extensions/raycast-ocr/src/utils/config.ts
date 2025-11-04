@@ -1,7 +1,7 @@
 /**
- * 配置管理工具
- * 读取和解析 Raycast 扩展偏好设置
- * 优先从 LocalStorage 读取用户自定义配置，回退到扩展偏好设置
+ * Configuration Management Tool
+ * Reads and parses Raycast extension preference settings
+ * Prioritizes reading user custom configuration from LocalStorage, falls back to extension preferences
  */
 
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
@@ -21,12 +21,12 @@ interface Preferences {
 const CONFIG_STORAGE_KEY = "ocr-backend-config";
 
 /**
- * 获取用户配置的 OCR 后端配置
- * 优先读取 LocalStorage 中的配置，如果没有则读取扩展偏好设置
- * @returns OCR 后端配置对象
+ * Get user-configured OCR backend configuration
+ * Prioritizes reading configuration from LocalStorage, falls back to extension preferences if not found
+ * @returns OCR backend configuration object
  */
 export async function getBackendConfig(): Promise<OCRBackendConfig> {
-  // 尝试从 LocalStorage 读取
+  // Try reading from LocalStorage
   const storedConfig = await LocalStorage.getItem<string>(CONFIG_STORAGE_KEY);
 
   if (storedConfig) {
@@ -34,22 +34,22 @@ export async function getBackendConfig(): Promise<OCRBackendConfig> {
       return JSON.parse(storedConfig) as OCRBackendConfig;
     } catch (error) {
       console.error("Failed to parse stored config:", error);
-      // 如果解析失败，继续使用默认配置
+      // If parsing fails, continue with default configuration
     }
   }
 
-  // 回退到扩展偏好设置
+  // Fall back to extension preferences
   const prefs = getPreferenceValues<Preferences>();
   const backendType = prefs.ocrBackend as OCRBackend;
 
-  // 根据后端类型选择对应的配置
+  // Select corresponding configuration based on backend type
   if (backendType === OCRBackend.GEMINI_VLM) {
     return {
       type: backendType,
       apiKey: prefs.geminiApiKey?.trim(),
       apiEndpoint: prefs.geminiApiEndpoint?.trim() || "https://generativelanguage.googleapis.com/v1beta",
       model: prefs.geminiModel?.trim() || "gemini-2.5-flash",
-      detail: "high", // Gemini 不使用此字段，但保持接口一致
+      detail: "high", // Gemini doesn't use this field, but keep it for interface consistency
     };
   } else if (backendType === OCRBackend.OPENAI_VLM) {
     return {
@@ -72,8 +72,8 @@ export async function getBackendConfig(): Promise<OCRBackendConfig> {
 }
 
 /**
- * 保存 OCR 后端配置到 LocalStorage
- * @param config OCR 后端配置对象
+ * Save OCR backend configuration to LocalStorage
+ * @param config OCR backend configuration object
  */
 export async function saveBackendConfig(config: OCRBackendConfig): Promise<void> {
   await LocalStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));

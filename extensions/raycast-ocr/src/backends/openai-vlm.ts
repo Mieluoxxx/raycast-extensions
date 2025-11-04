@@ -1,6 +1,6 @@
 /**
- * OpenAI Vision Language Model 后端实现
- * 支持 OpenAI API 和兼容的第三方 API 端点
+ * OpenAI Vision Language Model Backend Implementation
+ * Supports OpenAI API and compatible third-party API endpoints
  */
 
 import { readFile } from "fs/promises";
@@ -17,11 +17,11 @@ export class OpenAIVLMBackend implements IOCRBackend {
     this.apiKey = config.apiKey || "";
     this.apiEndpoint = config.apiEndpoint || "https://api.openai.com/v1";
     this.model = config.model || "gpt-4o";
-    this.detail = config.detail || "high"; // OCR 场景推荐使用 high
+    this.detail = config.detail || "high"; // High is recommended for OCR scenarios
   }
 
   async recognizeText(imagePath: string, customPrompt?: string): Promise<string> {
-    // 验证配置
+    // Validate configuration
     if (!this.apiKey) {
       throw new OCRError(
         OCRErrorType.CONFIG_ERROR,
@@ -30,13 +30,13 @@ export class OpenAIVLMBackend implements IOCRBackend {
     }
 
     try {
-      // 1. 读取并转换图片
+      // 1. Read and convert image
       const { base64Image, mimeType } = await this.prepareImage(imagePath);
 
-      // 2. 确定使用的提示词
+      // 2. Determine the prompt to use
       const prompt = customPrompt || this.getOCRPrompt();
 
-      // 3. 构造 API 请求
+      // 3. Construct API request
       const response = await fetch(`${this.apiEndpoint}/chat/completions`, {
         method: "POST",
         headers: {
@@ -64,17 +64,17 @@ export class OpenAIVLMBackend implements IOCRBackend {
             },
           ],
           max_tokens: 2000,
-          temperature: 0, // 提高一致性
+          temperature: 0, // Improve consistency
         }),
         signal: AbortSignal.timeout(60000), // 60s timeout
       });
 
-      // 4. 处理 HTTP 错误
+      // 4. Handle HTTP errors
       if (!response.ok) {
         await this.handleAPIError(response);
       }
 
-      // 5. 解析响应
+      // 5. Parse response
       const data = (await response.json()) as {
         choices?: Array<{ message?: { content?: string } }>;
       };
@@ -105,7 +105,7 @@ export class OpenAIVLMBackend implements IOCRBackend {
   }
 
   /**
-   * 准备图片：读取、检测格式、转换为 base64
+   * Prepare image: read, detect format, convert to base64
    */
   private async prepareImage(imagePath: string): Promise<{
     base64Image: string;
@@ -126,7 +126,7 @@ export class OpenAIVLMBackend implements IOCRBackend {
   }
 
   /**
-   * 检测图片 MIME 类型
+   * Detect image MIME type
    */
   private detectImageType(imagePath: string): string {
     const ext = imagePath.toLowerCase().split(".").pop();
@@ -141,14 +141,14 @@ export class OpenAIVLMBackend implements IOCRBackend {
   }
 
   /**
-   * 获取默认的 OCR Prompt
+   * Get default OCR prompt
    */
   private getOCRPrompt(): string {
     return STANDARD_OCR_PROMPT;
   }
 
   /**
-   * 处理 API 错误响应
+   * Handle API error response
    */
   private async handleAPIError(response: Response): Promise<never> {
     let errorMessage = `API Error: ${response.status} ${response.statusText}`;
@@ -160,7 +160,7 @@ export class OpenAIVLMBackend implements IOCRBackend {
       };
       errorMessage = errorData.error?.message || errorMessage;
 
-      // 根据错误信息分类
+      // Classify based on error information
       if (response.status === 401) {
         errorType = OCRErrorType.API_KEY_INVALID;
         errorMessage = "Invalid API key. Please check your OpenAI API key in settings.";
@@ -172,7 +172,7 @@ export class OpenAIVLMBackend implements IOCRBackend {
         errorMessage = "OpenAI server error. Please try again later.";
       }
     } catch {
-      // 无法解析错误响应，使用默认消息
+      // Failed to parse error response, use default message
     }
 
     throw new OCRError(errorType, errorMessage);
@@ -183,8 +183,17 @@ export class OpenAIVLMBackend implements IOCRBackend {
       return false;
     }
 
-    // 简单验证 API Key 格式，避免额外的 API 调用
-    return this.apiKey.startsWith("sk-") && this.apiKey.length > 20;
+    // Simple API key validation to avoid extra API calls
+    // For official OpenAI endpoint, validate the sk- prefix
+    // For third-party endpoints, accept any non-empty key with reasonable length
+    const isOfficialEndpoint = this.apiEndpoint.includes("api.openai.com");
+
+    if (isOfficialEndpoint) {
+      return this.apiKey.startsWith("sk-") && this.apiKey.length > 20;
+    } else {
+      // Third-party endpoints may use different key formats
+      return this.apiKey.length >= 10;
+    }
   }
 
   getName(): string {

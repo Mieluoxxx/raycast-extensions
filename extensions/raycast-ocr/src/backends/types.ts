@@ -1,9 +1,9 @@
 /**
- * OCR 后端类型定义和接口
+ * OCR Backend Type Definitions and Interfaces
  */
 
 /**
- * 支持的 OCR 后端类型
+ * Supported OCR Backend Types
  */
 export enum OCRBackend {
   VISION_API = "vision",
@@ -12,76 +12,76 @@ export enum OCRBackend {
 }
 
 /**
- * OCR 后端配置
+ * OCR Backend Configuration
  */
 export interface OCRBackendConfig {
-  /** 后端类型 */
+  /** Backend type */
   type: OCRBackend;
-  /** OpenAI API Key（仅 OpenAI 后端需要） */
+  /** OpenAI API Key (only required for OpenAI backend) */
   apiKey?: string;
-  /** API 端点（支持自定义或第三方兼容端点） */
+  /** API Endpoint (supports custom or third-party compatible endpoints) */
   apiEndpoint?: string;
-  /** 模型名称 */
+  /** Model name */
   model?: string;
-  /** 图片清晰度级别（high 推荐用于 OCR） */
+  /** Image detail level (high recommended for OCR) */
   detail?: "auto" | "low" | "high";
 }
 
 /**
- * 统一的 OCR 后端接口
+ * Unified OCR Backend Interface
  */
 export interface IOCRBackend {
   /**
-   * 识别图片中的文字
-   * @param imagePath - 图片文件的绝对路径
-   * @param customPrompt - 可选的自定义提示词(用于 LaTeX 等特殊场景)
-   * @returns 识别出的文字内容
-   * @throws OCRError 识别失败时抛出错误
+   * Recognize text from image
+   * @param imagePath - Absolute path to the image file
+   * @param customPrompt - Optional custom prompt (for special scenarios like LaTeX)
+   * @returns Recognized text content
+   * @throws OCRError when recognition fails
    */
   recognizeText(imagePath: string, customPrompt?: string): Promise<string>;
 
   /**
-   * 验证后端配置是否有效
-   * @returns true 如果配置有效
+   * Validate backend configuration
+   * @returns true if configuration is valid
    */
   validateConfig(): Promise<boolean>;
 
   /**
-   * 获取后端显示名称
-   * @returns 后端名称
+   * Get backend display name
+   * @returns Backend name
    */
   getName(): string;
 }
 
 /**
- * OCR 错误类型
+ * OCR Error Types
  */
 export enum OCRErrorType {
-  /** 网络错误 */
+  /** Network error */
   NETWORK_ERROR = "network",
-  /** API Key 无效 */
+  /** Invalid API Key */
   API_KEY_INVALID = "api_key",
-  /** 配额超限 */
+  /** Quota exceeded */
   QUOTA_EXCEEDED = "quota",
-  /** 请求超时 */
+  /** Request timeout */
   TIMEOUT = "timeout",
-  /** 无效的图片 */
+  /** Invalid image */
   INVALID_IMAGE = "invalid_image",
-  /** 配置错误 */
+  /** Configuration error */
   CONFIG_ERROR = "config",
-  /** 未知错误 */
+  /** Unknown error */
   UNKNOWN = "unknown",
 }
 
 /**
- * OCR 自定义错误类
+ * OCR Custom Error Class
  */
 export class OCRError extends Error {
   /**
-   * 创建 OCR 错误
-   * @param type 错误类型
-   * @param message 错误消息
-   * @param details 错误详情（可选）
+   * Create OCR Error
+   * @param type Error type
+   * @param message Error message
+   * @param details Error details (optional)
    */
   constructor(
     public type: OCRErrorType,

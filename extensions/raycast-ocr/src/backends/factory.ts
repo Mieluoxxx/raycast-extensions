@@ -1,6 +1,6 @@
 /**
- * OCR 后端工厂
- * 使用工厂模式创建不同类型的 OCR 后端实例
+ * OCR Backend Factory
+ * Uses factory pattern to create different types of OCR backend instances
  */
 
 import { OCRBackend, OCRBackendConfig, IOCRBackend } from "./types";
@@ -10,10 +10,10 @@ import { GeminiVLMBackend } from "./gemini-vlm";
 
 export class OCRBackendFactory {
   /**
-   * 创建 OCR 后端实例
-   * @param config 后端配置
-   * @returns OCR 后端实例
-   * @throws Error 如果后端类型未知
+   * Create OCR backend instance
+   * @param config Backend configuration
+   * @returns OCR backend instance
+   * @throws Error if backend type is unknown
    */
   static create(config: OCRBackendConfig): IOCRBackend {
     switch (config.type) {
