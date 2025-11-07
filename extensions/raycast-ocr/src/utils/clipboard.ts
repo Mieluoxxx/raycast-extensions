@@ -1,18 +1,11 @@
 import { Clipboard } from "@raycast/api";
-import { unlink } from "fs/promises";
-import { exec } from "child_process";
+import { unlink, writeFile } from "fs/promises";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import { randomUUID } from "crypto";
 
-const execAsync = promisify(exec);
-
-/**
- * Escape shell argument to prevent command injection
- */
-function escapeShellArg(arg: string): string {
-  return arg.replace(/'/g, "'\\''");
-}
+const execFileAsync = promisify(execFile);
 
 /**
  * Get image from clipboard and save to temporary file
@@ -39,27 +32,39 @@ export async function getClipboardImagePath(): Promise<string | null> {
   try {
     const tempPath = path.join("/tmp", `raycast-ocr-${randomUUID()}.png`);
 
-    // Use osascript to check and save clipboard image
-    const script = `
-      set theFile to POSIX file "'${escapeShellArg(tempPath)}'"
-      try
-        set imageData to the clipboard as «class PNGf»
-        set fileRef to open for access theFile with write permission
-        write imageData to fileRef
-        close access fileRef
-        return "success"
-      on error
-        return "no_image"
-      end try
-    `;
+    // Create a temporary AppleScript file to avoid shell escaping issues
+    const scriptPath = path.join("/tmp", `ocr-script-${randomUUID()}.applescript`);
+    const script = `set theFile to POSIX file "${tempPath}"
+try
+  set imageData to the clipboard as «class PNGf»
+  set fileRef to open for access theFile with write permission
+  write imageData to fileRef
+  close access fileRef
+  return "success"
+on error
+  return "no_image"
+end try`;
 
-    const { stdout } = await execAsync(`osascript -e '${script.replace(/'/g, "'\"'\"'")}'`);
+    await writeFile(scriptPath, script);
 
-    if (stdout.trim() === "success") {
-      return tempPath;
+    try {
+      const { stdout } = await execFileAsync("osascript", [scriptPath]);
+
+      if (stdout.trim() === "success") {
+        await cleanupTempFile(scriptPath);
+        return tempPath;
+      }
+
+      await cleanupTempFile(scriptPath);
+      return null;
+    } finally {
+      // Ensure script is cleaned up
+      try {
+        await cleanupTempFile(scriptPath);
+      } catch {
+        // Ignore cleanup errors
+      }
     }
-
-    return null;
   } catch {
     // No image in clipboard
     return null;
@@ -73,8 +78,8 @@ export async function getClipboardImagePath(): Promise<string | null> {
 export async function takeScreenshot(): Promise<string> {
   const tempPath = path.join("/tmp", `raycast-ocr-screenshot-${randomUUID()}.png`);
 
-  // Use macOS screencapture utility with full path
-  await execAsync(`/usr/sbin/screencapture -i '${escapeShellArg(tempPath)}'`);
+  // Use macOS screencapture utility with execFile to avoid shell injection
+  await execFileAsync("/usr/sbin/screencapture", ["-i", tempPath]);
 
   return tempPath;
 }

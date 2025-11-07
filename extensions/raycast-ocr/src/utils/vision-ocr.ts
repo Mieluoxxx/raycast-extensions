@@ -1,21 +1,14 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import { environment } from "@raycast/api";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface VisionResult {
   success: boolean;
   text?: string;
   error?: string;
-}
-
-/**
- * Escape shell argument to prevent command injection
- */
-function escapeShellArg(arg: string): string {
-  return arg.replace(/'/g, "'\\''");
 }
 
 /**
@@ -29,13 +22,10 @@ export async function recognizeTextFromImage(imagePath: string): Promise<string>
   const scriptPath = path.join(environment.assetsPath, "scripts", "vision-ocr.swift");
 
   try {
-    const { stdout, stderr } = await execAsync(
-      `/usr/bin/swift '${escapeShellArg(scriptPath)}' '${escapeShellArg(imagePath)}'`,
-      {
-        timeout: 30000, // 30 second timeout for Swift compilation and Vision API processing
-        maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large text output
-      }
-    );
+    const { stdout, stderr } = await execFileAsync("/usr/bin/swift", [scriptPath, imagePath], {
+      timeout: 30000, // 30 second timeout for Swift compilation and Vision API processing
+      maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large text output
+    });
 
     // Log stderr for debugging if present
     if (stderr) {
