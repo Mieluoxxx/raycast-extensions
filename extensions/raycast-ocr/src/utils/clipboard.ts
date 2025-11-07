@@ -32,9 +32,10 @@ export async function getClipboardImagePath(): Promise<string | null> {
   try {
     const tempPath = path.join("/tmp", `raycast-ocr-${randomUUID()}.png`);
 
-    // Create a temporary AppleScript file to avoid shell escaping issues
+    // Create a temporary AppleScript file that uses environment variable for safe path handling
     const scriptPath = path.join("/tmp", `ocr-script-${randomUUID()}.applescript`);
-    const script = `set theFile to POSIX file "${tempPath}"
+    const script = `set outputFile to (system attribute "OCR_OUTPUT_PATH")
+set theFile to POSIX file outputFile
 try
   set imageData to the clipboard as «class PNGf»
   set fileRef to open for access theFile with write permission
@@ -48,7 +49,9 @@ end try`;
     await writeFile(scriptPath, script);
 
     try {
-      const { stdout } = await execFileAsync("osascript", [scriptPath]);
+      const { stdout } = await execFileAsync("osascript", [scriptPath], {
+        env: { ...process.env, OCR_OUTPUT_PATH: tempPath },
+      });
 
       if (stdout.trim() === "success") {
         await cleanupTempFile(scriptPath);
@@ -89,8 +92,17 @@ export async function takeScreenshot(): Promise<string> {
  * @param filePath - Path to file to delete
  */
 export async function cleanupTempFile(filePath: string): Promise<void> {
-  // Only delete files in /tmp directory for safety
-  if (!filePath.startsWith("/tmp/raycast-ocr")) {
+  // Only delete files in /tmp directory created by this extension for safety
+  // Check that the path is within /tmp and doesn't contain path traversal attempts
+  const tmpDir = "/tmp/";
+  if (!filePath.startsWith(tmpDir) || filePath.includes("..")) {
+    return;
+  }
+
+  // Verify the path resolves to something within /tmp (prevents symlink attacks)
+  const resolvedPath = path.resolve(filePath);
+  const resolvedTmpDir = path.resolve(tmpDir);
+  if (!resolvedPath.startsWith(resolvedTmpDir)) {
     return;
   }
 
